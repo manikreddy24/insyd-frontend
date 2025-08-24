@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './App.css';
 
@@ -11,8 +11,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Fetch notifications for the current user
-  const fetchNotifications = async () => {
+  // Fetch notifications for the current user - wrapped in useCallback
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -26,7 +26,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]); // Added userId as dependency
 
   // Simulate different types of events
   const simulateEvent = async (eventType) => {
@@ -53,7 +53,8 @@ function App() {
       }
       
       console.log('Sending notification to:', `${API_BASE_URL}/notifications`);
-      const response = await axios.post(`${API_BASE_URL}/notifications`, {
+      // FIXED: Removed unused 'response' variable
+      await axios.post(`${API_BASE_URL}/notifications`, {
         userId: userId,
         type: eventType,
         sourceUserId: randomUser,
@@ -71,13 +72,13 @@ function App() {
   // Load notifications on component mount and when userId changes
   useEffect(() => {
     fetchNotifications();
-  }, [userId]);
+  }, [fetchNotifications]); // FIXED: Added fetchNotifications as dependency
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>Insyd Notification System</h1>
-        {/*<p className="backend-info">Connected to: {API_BASE_URL}</p>*/}
+        <p className="backend-info">Connected to: {API_BASE_URL}</p>
       </header>
       
       <div className="container">
